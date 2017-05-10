@@ -15,7 +15,7 @@ function Game(width, height, canvas, cellSize){
 	
 	let loopid;
 	const fps = 30;
-	const foodFrequency = 100; //The higher this number, the slower food will be generated
+	const foodFrequency = 1; //The higher this number, the slower food will be generated
 	let tick = 0;
 
 	return game;

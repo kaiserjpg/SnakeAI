@@ -10,6 +10,8 @@
 		throw "Invalid canvas size. Width & Height must be multiples of " + cellSize;
 	}
 
+	canvas.font = "20px Calibri";
+
 	// Initialize game.
 	var game = new Game(canvasWidth/cellSize, canvasHeight/cellSize, canvas, cellSize);
 
@@ -101,7 +103,7 @@
 		game.snakes.forEach(snake => {
 			allPlayers.push({
 				playerName: snake.name && snake.name !== "" ? snake.name : "Anonymous",
-				score: snake.body.length,
+				score: snake.body.length - 4,
 				isDead: false
 			});
 		});
@@ -109,7 +111,7 @@
 		game.deadSnakes.forEach(snake => {
 			allPlayers.push({
 				playerName: snake.name && snake.name !== "" ? snake.name : "Anonymous",
-				score: snake.body.length,
+				score: snake.body.length - 4,
 				isDead: true
 			});
 		});

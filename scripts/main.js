@@ -23,6 +23,20 @@
 	aiSnake.loop = snakeAILoop;
 	game.addSnake(aiSnake);
 
+	for(var i = 0; i < 20 ; i++){
+        let snake = new Snake(Math.floor(Math.random() * game.width), Math.floor(Math.random() * game.height), {color: getRandomColor()});
+        snake.loop = snakeAILoop;
+        game.addSnake(snake);
+    }
+    function getRandomColor() {
+        var letters = '0123456789ABCDEF';
+        var color = '#';
+        for (var i = 0; i < 6; i++ ) {
+            color += letters[Math.floor(Math.random() * 16)];
+        }
+        return color;
+    }
+
 	$("#addSnakeBtn").click(function(){
 		addHumanPlayer();
 		$(this).prop('disabled', 'disabled');

@@ -9,25 +9,8 @@ function snakeAILoop(game){
         var takenSpaces = game.snakes.reduce((acc,val) => acc.concat(val.body) ,[]);
         takenSpaces = takenSpaces.concat(game.obstacles);
         
-        for(var i = 0; i < game.width ; i++){
-            for(var j = 0; j < game.height; j++){
-                let newPos = new Position(i,j);
-                let intersects = false;
-                for(var k = 0; k < takenSpaces.length; k++){
-                    if(newPos.intersects(takenSpaces[k])){
-                        intersects = true;
-                        break;
-                    }
-                }
-                if(!intersects){
-                    availableSpaces.push(newPos);
-                }
-                                
-            }
-        }
-        
         snake.memory.viableFood = getViableFood(game.food, snake.direction, snake.getHead()) || [];
-        snake.memory.availableSpaces = availableSpaces;
+        //snake.memory.availableSpaces = availableSpaces;
         snake.memory.takenSpaces = takenSpaces;
         return snake.memory;
     }

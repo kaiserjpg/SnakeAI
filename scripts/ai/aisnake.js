@@ -54,12 +54,20 @@ function snakeAILoop(game){
             
             food[i].posibleDistance = food[i].posibleDistance.sort(function (a, b) {
                 return a.distance - b.distance;
-            })
+            });
             //do some crazy stuff to predict if viable
             food[i].viable = true;
-            console.info(food[i]);
-            console.info(headPosition);
-            console.info(currentDirection);
+            //if there are obstacles/snakes body including head for three posible directions is not viable to get that food.            
+
+
+            //if there is another snake 1 range closer according to the distance to get that food
+
+
+            //if 20% of the area within the food item considering only a 4 range of around it is full of taken spaces 
+
+            // console.info(food[i]);
+            // console.info(headPosition);
+            // console.info(currentDirection);
         }        
         var viable = food.filter(function (item) {
             return item.viable;
@@ -72,11 +80,6 @@ function snakeAILoop(game){
     
     //direction decision manager  (main)
     function goTo(game, snake) {
-        //go to a random if there is no food
-        //var randomSpace = Math.floor(Math.random() * availableSpaces.length);
-        //activate hunting mode
-        //if there are obstacle for three posible directions is not viable to get that food.
-        
         var directions = ['N', 'E', 'S', 'W'];
         var index = Math.floor(Math.random() * directions.length);
         var newDirection = directions[index];
@@ -94,6 +97,7 @@ function snakeAILoop(game){
                 newDirection = location[0].direction;
             }
         } else {
+            //activate hunting mode
             var headPosition = snake.getHead();
             var positionNoFood = predictLocation(headPosition.x, headPosition.y, newDirection, 1);
             while(willCrash(game, snake.memory, positionNoFood) && directions.length > 0) {
@@ -144,6 +148,14 @@ function snakeAILoop(game){
                 break;
         }
         return position;
+    }
+
+    //Get a new location base on a new direction and counter to define the range
+    function proyectLocation(isX, isY, game, position) {
+        for(var k = 0; k < memory.takenSpaces.length; k++){
+
+        }
+        return false;        
     }
 
     //dictates if the position will intercept with another object (obstacle, snake) 

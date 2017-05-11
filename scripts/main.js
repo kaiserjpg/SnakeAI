@@ -23,7 +23,7 @@
 	aiSnake.loop = snakeAILoop;
 	game.addSnake(aiSnake);
 
-	for(var i = 0; i < 20 ; i++){
+	for(var i = 0; i < 3 ; i++){
         let snake = new Snake(Math.floor(Math.random() * game.width), Math.floor(Math.random() * game.height), {color: getRandomColor()});
         snake.loop = snakeAILoop;
         game.addSnake(snake);

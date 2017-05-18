@@ -1,9 +1,11 @@
 function snakeAILoopJPG(game){
-    this.memory.availableSpaceNearFood = 0.91;
+    this.name = "JPG";
+    this.memory.offset = 3;
+    this.memory.availableSpaceNearFood = 0.6;
     this.memory.range = 4;
-    this.memory.activateOccupiedSpacex3FoodRule = false;
-    this.memory.activateWillGetThereFasterFoodRule = false;
-    this.memory.activateAvailableRangeFoodRule = false;
+    this.memory.activateOccupiedSpacex3FoodRule = true;
+    this.memory.activateWillGetThereFasterFoodRule = true;
+    this.memory.activateAvailableRangeFoodRule = true;
     var snake = this;    
     snake.memory = determineSpaces(game, snake);
     return goTo(game, snake);
@@ -29,20 +31,32 @@ function snakeAILoopJPG(game){
         for(var i = 0; i < food.length ; i++){
             food[i].currentDistance = calculateDistante(food[i], headPosition);
             food[i].posibleDistance = [];
+            //do some crazy stuff to predict if viable
+            food[i].viable = true;
             
             //TODO: Refactor into a function that returns an array with directions positions, distance and whether is valid
             //we could add booleans to determine if distance or valid calculations are required 
             var directions = ['N', 'E', 'S', 'W'];
             for(var k = 0; k < directions.length; k++) {
+                if(isBackwards(directions[k])) 
+                    continue;
+
                 var position = predictLocation(headPosition.x, headPosition.y, directions[k], 1);
+
+                if(willCrash(game, snake.memory, position)) 
+                    continue;
+
                 food[i].posibleDistance.push({ direction: directions[k], position: position, 
                     distance: calculateDistante(food[i], position), snakeHead: headPosition });
             }
-            food[i].posibleDistance = food[i].posibleDistance.sort(function (a, b) {
-                return a.distance - b.distance;
-            });
-            //do some crazy stuff to predict if viable
-            food[i].viable = true;
+            if (food[i].posibleDistance.length > 0) {
+                food[i].posibleDistance = food[i].posibleDistance.sort(function (a, b) {
+                    return a.distance - b.distance;
+                });
+            } else {
+                console.log("What?");
+                food[i].viable = false;
+            }
             //if there are obstacles/snakes body including head for three posible directions is not viable to get that food.  
             //TODO: Refactor into a function that returns an array with directions positions, distance and whether is valid
             //we could add booleans to determine if distance or valid calculations are required   
@@ -120,33 +134,73 @@ function snakeAILoopJPG(game){
     //direction decision manager  (main)
     function goTo(game, snake) {
         var directions = ['N', 'E', 'S', 'W'];
-        var index = Math.floor(Math.random() * directions.length);
-        var newDirection = directions[index];
-        var isBackwards = false;
+        var newDirection;
+        var possibleSafeDirection = [];
+
+        for(var k = 0; k < directions.length; k++) {
+            if(isBackwards(directions[k])) 
+                continue;
+
+            var position = predictLocation(snake.getHead().x, snake.getHead().y, directions[k], 1);
+
+            if(willCrash(game, snake.memory, position)) 
+                continue;
+
+            possibleSafeDirection.push({ 
+                direction: directions[k], 
+                position: position, 
+                availableSpace: getSurroundings(position.x, position.y, snake.memory, directions[k])
+            });
+        }
+
+        if (possibleSafeDirection.length > 0) {
+            possibleSafeDirection = possibleSafeDirection.sort(function (a, b) {
+                return a.availableSpace.length - b.availableSpace.length;
+            });//TODO: Could include acceptance criteria for avaiable space to be considered safe like 90% or so.
+        }
+        var safestPosition = possibleSafeDirection.length > 0 ? possibleSafeDirection[0] : null;
 
         if (snake.memory.viableFood.length > 0) {
             //we got food
             //find nearesth distance food
             var nearestFood = snake.memory.viableFood[0];
-            var location = nearestFood.posibleDistance.filter(function (location) {
-                return !willCrash(game, snake.memory, location.position);
-            }) || [];
 
-            if (location.length > 0) {
-                newDirection = location[0].direction;
+            if (nearestFood.posibleDistance.length > 0) {
+                newDirection = nearestFood.posibleDistance[0].direction;
             }
         } else {
-            //activate hunting mode
-            //hunt the closest bigger snake
-            var headPosition = snake.getHead();
-            var positionNoFood = predictLocation(headPosition.x, headPosition.y, newDirection, 1);
-            while(willCrash(game, snake.memory, positionNoFood) && directions.length > 0) {
-                directions.splice(index, 1);
-                index = Math.floor(Math.random() * directions.length);
-                newDirection = directions[index];
+            if (safestPosition) {
+                newDirection = safestPosition.direction;
+                 //activate hunting mode
+                //hunt the closest bigger snake
+            } else {
+                console.log("No Direction? Random then.");
+                // var index = Math.floor(Math.random() * directions.length);
+                // newDirection = directions[index];
+                // var positionInsecureAndNoFood = predictLocation(snake.getHead().x, snake.getHead().y, newDirection, 1);
+                // while(willCrash(game, snake.memory, positionInsecureAndNoFood) && directions.length > 0) {
+                //     directions.splice(index, 1);
+                //     index = Math.floor(Math.random() * directions.length);
+                //     newDirection = directions[index];
+                //     positionInsecureAndNoFood = predictLocation(snake.getHead().x, snake.getHead().y, newDirection, 1);
+                // }
             }
         }
 
+        if (!newDirection) {
+            newDirection = snake.direction;
+        }
+
+        if(!isBackwards(newDirection)) {
+            return newDirection;
+        } else {
+            console.log("Backwards position shouldn't happened. Why then?");
+        }
+    }
+
+    //check backwards position so you dont die by your own head xD
+    function isBackwards(newDirection) {
+        var isBackwards = false;
         switch(newDirection){
             case 'N':
                 isBackwards = snake.direction == 'S';
@@ -164,10 +218,51 @@ function snakeAILoopJPG(game){
                 isBackwards = snake.direction == 'E';
                 break;
         }
+        
+        return isBackwards;
+    }
 
-        if (!isBackwards) {
-            return newDirection;
+    function getSurroundings(positionX, positionY, memory, direction) {
+        var surroundings = []; 
+        var range = memory.range;
+        var offset = memory.offset;
+        switch(direction){
+            case 'N':
+                for(var x = positionX - range; x < positionX + range; x++) {
+                    for(var y = positionY - range - offset; y < positionY + range; y++) {
+                        surroundings.push(new Position(x, y));
+                    }
+                }
+                break;
+
+            case 'E':
+                for(var x = positionX - range; x < positionX + range + offset; x++) {
+                    for(var y = positionY - range; y < positionY + range; y++) {
+                        surroundings.push(new Position(x, y));
+                    }
+                }
+                break;
+
+            case 'S':
+                for(var x = positionX - range; x < positionX + range; x++) {
+                    for(var y = positionY - range; y < positionY + range + offset; y++) {
+                        surroundings.push(new Position(x, y));
+                    }
+                }
+                break;
+
+            case 'W':
+                for(var x = positionX - range - offset; x < positionX + range; x++) {
+                    for(var y = positionY - range; y < positionY + range; y++) {
+                        surroundings.push(new Position(x, y));
+                    }
+                }
+                break;
         } 
+        let area = new Set(surroundings);
+        let availableSpace = memory.takenSpaces.filter(x => area.has(x)) || [];
+
+        return availableSpace;
     }
 
     //Get a new location base on a new direction and counter to define the range
@@ -177,14 +272,26 @@ function snakeAILoopJPG(game){
             case 'N':
                 position = new Position(x, y - counter);
                 break;
+            case 'NE':
+                position = new Position(x + counter, y + counter);
+                break;
             case 'E':
                 position = new Position(x + counter, y);
+                break;
+            case 'SE':
+                position = new Position(x + counter, y - counter);
                 break;
             case 'S':
                 position = new Position(x, y + counter);
                 break;
+            case 'SW':
+                position = new Position(x - counter, y + counter);
+                break;
             case 'W':
                 position = new Position(x - counter, y);
+                break;
+            case 'NW':
+                position = new Position(x - counter, y - counter);
                 break;
         }
         return position;

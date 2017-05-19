@@ -9,8 +9,8 @@ function snakeAILoopJPG(game){
 
     //info gatherer manager 
     function setInfo(snake) {
-        snake.name = "JPG";
-        snake.color = "#0099cc";
+        //snake.name = "JPG";
+        //snake.color = "#0099cc";
         snake.memory.offset = 10;
         snake.memory.availableSpaceNearFood = 0.49;
         snake.memory.range = 3;
@@ -18,6 +18,8 @@ function snakeAILoopJPG(game){
         snake.memory.activateOccupiedSpacex3FoodRule = true;
         snake.memory.activateWillGetThereFasterFoodRule = true;
         snake.memory.activateAvailableRangeFoodRule = true;
+        snake.memory.paths = snake.memory.paths || [];
+        snake.memory.paths.push(snake.direction);
 
         return snake;
     }
@@ -92,7 +94,6 @@ function snakeAILoopJPG(game){
             //Not surronded by 3 obstacles different than your backward position    
             if (snake.memory.activateOccupiedSpacex3FoodRule == true) {
                 if (food[i].validSurroundings.length < 2) {
-                    debugger;
                     food[i].viable = false;
                     console.info("activateOccupiedSpacex3FoodRule");
                     console.log(food[i].validSurroundings);
@@ -146,6 +147,10 @@ function snakeAILoopJPG(game){
                     console.info("activateAvailableRangeFoodRule");
                     console.log((availableSpace.length / food[i].surroundings.length));
                 }
+            }
+
+            if (food[i].viable) {
+                food[i].color = snake.color;
             }
         }
 

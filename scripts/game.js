@@ -78,8 +78,8 @@ function Game(width, height, canvas, cellSize){
 	
 	function drawFood() {
 		var current = canvas.fillStyle;
-		canvas.fillStyle = "#0f0";
 		game.food.forEach(position => {
+			canvas.fillStyle = position.color || "#0f0";
 			canvas.fillRect(position.x * cellSize, position.y * cellSize, cellSize, cellSize);
 		});
 		canvas.fillStyle = current;
@@ -127,9 +127,13 @@ function Game(width, height, canvas, cellSize){
 
 	function drawSnake(snake){
 		var currentStyle = canvas.fillStyle;
-		canvas.fillStyle = snake.color;
 
 		snake.body.forEach(position => {
+			if (snake.body[0].x == position.x && snake.body[0].y == position.y) {
+				canvas.fillStyle = "red";
+			} else {
+				canvas.fillStyle = snake.color;
+			}
 			canvas.fillRect(position.x * cellSize, position.y * cellSize, cellSize, cellSize);
 		});
 

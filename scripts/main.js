@@ -19,17 +19,17 @@
 	game.obstacles = staticObstacles;
 
 	//Add the AI snake
-	var aiSnake = new Snake(Math.floor(game.width/2),Math.floor(game.height/2), {name: "AI", direction: "E", color: "#00F"});
+	var aiSnake = new Snake(Math.floor(game.width/2),Math.floor(game.height/2), {name: "JPG", direction: "E", color: "#00F"});
 	aiSnake.loop = snakeAILoopJPG;
 	game.addSnake(aiSnake);
 
-	for(var i = 0; i < 20 ; i++){
-        let snake = new Snake(Math.floor(Math.random() * game.width), Math.floor(Math.random() * game.height), {color: getRandomColor()});
+	for(var i = 0; i < 3 ; i++){
+        let snake = new Snake(Math.floor(Math.random() * game.width), Math.floor(Math.random() * game.height), {name: "JPG"+i.toString(), color: getRandomColor()});
         snake.loop = snakeAILoopJPG;
         game.addSnake(snake);
     }
 
-	for(var i = 0; i < 10 ; i++){
+	for(var i = 0; i < 0 ; i++){
         let snake = new Snake(Math.floor(Math.random() * game.width), Math.floor(Math.random() * game.height), {color: getRandomColor()});
         snake.loop = snakeAILoop;
         game.addSnake(snake);

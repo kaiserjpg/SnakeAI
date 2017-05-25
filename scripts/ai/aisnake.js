@@ -18,10 +18,29 @@ function snakeAILoopJPG(game){
         snake.memory.activateOccupiedSpacex3FoodRule = true;
         snake.memory.activateWillGetThereFasterFoodRule = true;
         snake.memory.activateAvailableRangeFoodRule = true;
+        snake.memory.activateIsSurroundedFoodRule = true;
         snake.memory.paths = snake.memory.paths || [];
         snake.memory.paths.push(snake.direction);
+        if(!snake.memory.counter){
+            snake.memory.board = new Board(game.width, game.height);
+            snake.memory.counter = 1;
+        }
 
         return snake;
+    }
+    
+    function Board(width,height){
+
+        var board = [];
+
+        for(var x = 0; x < width; x++) {
+            for(var y = 0; y < height; y++) {
+                board.push(new Position(x, y)); 
+            }
+        }
+        
+        return board;
+        
     }
 
     function getInfo(game, snake){
@@ -58,8 +77,12 @@ function snakeAILoopJPG(game){
 
                 //Not surronded by 3 obstacles different than your backward position    
                 if (snake.memory.activateOccupiedSpacex3FoodRule == true) {
-                    if(!willCrash(game, snake.memory, foodPosition)) 
+                    if (foodPosition.x == headPosition.x, foodPosition.y == headPosition.y) {
                         food[i].validSurroundings.push({ direction: directions[k], position: foodPosition});
+                    } else {
+                        if(!willCrash(game, snake.memory, foodPosition)) 
+                            food[i].validSurroundings.push({ direction: directions[k], position: foodPosition});
+                    }
                 }   
 
                 if(isBackwards(directions[k])) 
@@ -147,6 +170,9 @@ function snakeAILoopJPG(game){
                     console.info("activateAvailableRangeFoodRule");
                     console.log((availableSpace.length / food[i].surroundings.length));
                 }
+            }
+
+            if (snake.memory.activateIsSurroundedFoodRule == true) {
             }
 
             if (food[i].viable) {

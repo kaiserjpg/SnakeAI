@@ -1,4 +1,4 @@
-function Game(width, height, canvas, cellSize){
+function Game(width, height){
 	"use strict";
 	var game = {
 		snakes : [],
@@ -7,82 +7,72 @@ function Game(width, height, canvas, cellSize){
 		food : [],
 		height : height,
 		width: width,
-		cellSize: cellSize,
 		addSnake : addSnake,
-		startGame : startGame,
-		stopGame : stopGame
+		loop: loop
 	}
 	
-	let loopid;
-	const fps = 30;
 	const foodFrequency = 100; //The higher this number, the slower food will be generated
 	let tick = 0;
 
 	return game;
-	
-	function startGame(){
-		loopid = setInterval(function() {
-			loop();
-
-			if (isGameOver()) {
-				clearInterval(loopid);
-			};
-		}, 1000 / fps);
-	}
-
-	function stopGame(){
-		clearInterval(loopid);
-	}
-
-	function isGameOver() {
-		return game.snakes.length <= 0;
-	}
 
 	function loop() {
 
 		// Move snakes depending on the direction set in the loop function.
 		game.snakes.forEach((snake) => {
-			var newDirection = snake.loop(game);
-			if(newDirection){
-				snake.direction = newDirection;
+			try {
+				var newDirection = snake.loop(game);
+				if(newDirection){
+					snake.direction = newDirection;
+				}
 			}
+			catch(ex) {
+				var msg = "Snake " + (snake.name ? snake.name : "") + " is throwing an exception: ";
+				console.log(msg, ex);
+			}
+			
 			moveSnake(snake);
 		});	
 
-		// Clear board.
-		canvas.clearRect(0, 0, width * game.cellSize, height * game.cellSize);
-
 		evaluateBoard();
 
-		game.snakes.forEach(snake => {
-			drawSnake(snake);
-		});
-
 		//Grow food
-		if(++tick % fps * foodFrequency == 0){
+		if(++tick % 30 * foodFrequency == 0){
 			growFood();
 			if(game.food.length > 10){
 				game.food.shift();
 			}
 		}
 
-		drawFood();
-		drawObstacles();
+		return  {
+			id : tick,
+			snakes : cloneSnakes(game.snakes),
+			deadSnakes : cloneSnakes(game.deadSnakes),
+			obstacles : game.obstacles,
+			food : cloneFood(game.food),
+			height : game.height,
+			width: game.width,
+		};
 	};
 
-	function drawObstacles(){
-		game.obstacles.forEach(position => {
-			canvas.fillRect(position.x * cellSize, position.y * cellSize, cellSize, cellSize);
+	function cloneSnakes(snakes) {
+		var clonedSnakes = [];
+
+		snakes.forEach(snake => {
+			clonedSnakes.push({
+				id: snake.id,
+				name: snake.name,
+				color: snake.color,
+				direction: snake.direction,
+				body: new Array(...snake.body)
+			});
 		});
+
+		return clonedSnakes;
 	}
-	
-	function drawFood() {
-		var current = canvas.fillStyle;
-		game.food.forEach(position => {
-			canvas.fillStyle = position.color || "#0f0";
-			canvas.fillRect(position.x * cellSize, position.y * cellSize, cellSize, cellSize);
-		});
-		canvas.fillStyle = current;
+
+	function cloneFood(food) {
+		return new Array(...food);
 	}
 
 	function addSnake(snake) {
@@ -123,25 +113,6 @@ function Game(width, height, canvas, cellSize){
 
 		snake.body.unshift(newPosition);
 		
-	}
-
-	function drawSnake(snake){
-		var currentStyle = canvas.fillStyle;
-
-		snake.body.forEach(position => {
-			if (snake.body[0].x == position.x && snake.body[0].y == position.y) {
-				canvas.fillStyle = "red";
-			} else {
-				canvas.fillStyle = snake.color;
-			}
-			canvas.fillRect(position.x * cellSize, position.y * cellSize, cellSize, cellSize);
-		});
-
-		if (snake.name && snake.name != "") {
-			canvas.fillText(snake.name, (snake.getHead().x-1)*cellSize, (snake.getHead().y-1)*cellSize);
-		}
-
-		canvas.fillStyle = currentStyle;
 	}
 
 	function evaluateBoard() {

@@ -6,6 +6,7 @@ function Snake(x, y, options) {
 		initialSize: 4
 	}, options);
 	
+	this.id = Math.floor(Math.random() * 9999);
 	this.name = options.name;
 	this.body = [];
 	this.direction = options.direction;

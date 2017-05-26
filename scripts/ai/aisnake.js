@@ -172,7 +172,8 @@ function snakeAILoopJPG(game){
                 }
             }
 
-            if (snake.memory.activateIsSurroundedFoodRule == true) {
+            if (snake.memory.activateIsSurroundedFoodRule == true && !food[i].isForbidden) {
+                //food[i].isForbidden = true;
             }
 
             if (food[i].viable) {
@@ -181,7 +182,7 @@ function snakeAILoopJPG(game){
         }
 
         var viable = food.filter(function (item) {
-            return item.viable;
+            return item.viable && !isForbidden;
         }).sort(function(a, b) {
             return a.currentDistance - b.currentDistance;
         });
